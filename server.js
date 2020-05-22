@@ -1,27 +1,31 @@
+const path = require('path');
+const http = require('http');
 const express = require('express');
 const socketio = require('socket.io');
-const http = require('http');
-
-const PORT = process.env.PORT || 5000;
-
-// const router = require('./router');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
-io.on('connection', (socket) => {
-    console.log("New connection !!!");
+//Static folder
+app.use(express.static(path.join(__dirname, 'public')));
 
-    socket.on('join', ({ name, room }) => {
-        console.log(name, room);
-    });
+//run when client connect
+io.on('connection', socket => {
 
+    //bienvenue
+    socket.emit('message', "bienvenue");
+
+    //user connection
+    io.emit('message', 'un utilisateur a rejoin le chat');
+
+    //user deconnection
     socket.on('disconnect', () => {
-        console.log("User had left !!!");
-    })
+        io.emit('message', 'un utilisateur a quitter le channel');
+    });
 });
 
-// app.use(router);
+const PORT = process.env.PORT || 4242;
 
-server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
+server.listen(PORT, () => console.log(`le server est lancer port ${PORT}`));
+
